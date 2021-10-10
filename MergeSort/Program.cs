@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace MergeSort
 {
     public class Program
     {
-
+        //NOTE: My mergesort functions is taken from my CPSC 259 lab for mergesort
         // a helper function to print your array
         static void PrintArray(int[] myArray)
         {
@@ -47,11 +48,7 @@ namespace MergeSort
             for (j = 0; j < n2; j++)
                 RA[j] = arr[m + 1 + j];
            
-            //Console.WriteLine();
-            //PrintArray(LA);
-            //Console.WriteLine();
-            //PrintArray(RA);
-            
+                       
 
             /* Merge the temp arrays back into arr[l..r]*/
             i = 0; // Initial index of first subarray
@@ -121,8 +118,10 @@ namespace MergeSort
         public static void Main(string[] args)
         {
 
-                int ARRAY_SIZE = 1000;
-                int num_array = 10;
+                int ARRAY_SIZE = 1000000;
+                int Max_Val = 1000;
+                int num_array = 1000;
+                int MTArraySize = ARRAY_SIZE / num_array;
                 int[] arraySingleThread = new int[ARRAY_SIZE];
 
 
@@ -135,7 +134,7 @@ namespace MergeSort
 
                 for (int i = 0; i < ARRAY_SIZE; i++)
                 {
-                    arraySingleThread[i] = rand.Next(1000);
+                    arraySingleThread[i] = rand.Next(Max_Val);
                     //Console.WriteLine(arraySingleThread[i]);
                 }
             
@@ -147,104 +146,89 @@ namespace MergeSort
 
                 int[] threadArray = new int[num_array];
 
-            //MergeSort(Splitted_array[1], 0, Splitted_array[1].Length-1); //-1 is to prevent array from going out of bounds
-            PrintArray(Splitted_array[1]);
-            
-            Thread t0 = new Thread(() => MergeSort(Splitted_array[0], 0, Splitted_array[0].Length - 1));
-            t0.Start();
-            
-            Thread t1 = new Thread(() => MergeSort(Splitted_array[1], 0, Splitted_array[1].Length-1));
-            t1.Start();
            
-            Thread t2 = new Thread(() => MergeSort(Splitted_array[2], 0, Splitted_array[2].Length - 1));
-            t2.Start();
+            Stopwatch stopWatchMT = new Stopwatch();
+            //TODO :start the stopwatch
+            stopWatchMT.Start();
+         
 
-            Thread t3 = new Thread(() => MergeSort(Splitted_array[3], 0, Splitted_array[3].Length - 1));
-            t3.Start();
 
-            Thread t4 = new Thread(() => MergeSort(Splitted_array[4], 0, Splitted_array[4].Length - 1));
-            t4.Start();
 
-            Thread t5 = new Thread(() => MergeSort(Splitted_array[5], 0, Splitted_array[5].Length - 1));
-            t5.Start();
 
-            Thread t6 = new Thread(() => MergeSort(Splitted_array[6], 0, Splitted_array[6].Length - 1));
-            t6.Start();
+            //Copied from example
+            List<Thread> threads = new List<Thread>();
+            for (int i = 0; i < num_array; i++)
+            {
+                int j = i;
+                
+               
+                Thread thread = new Thread(() => MergeSort(Splitted_array[j], 0, Splitted_array[j].Length - 1));
+                thread.Name = string.Format("Thread{0}", j + 1);
+                thread.Start();
+                threads.Add(thread);
 
-            Thread t7 = new Thread(() => MergeSort(Splitted_array[7], 0, Splitted_array[7].Length - 1));
-            t7.Start();
-            
-            Thread t8 = new Thread(() => MergeSort(Splitted_array[8], 0, Splitted_array[8].Length - 1));
-            t8.Start();
+            }
+            //join all the threads
+            foreach (Thread thread in threads)
+                thread.Join();
 
-            Thread t9 = new Thread(() => MergeSort(Splitted_array[9], 0, Splitted_array[9].Length - 1));
-            t9.Start();
+            //End of example from lecture
 
-            t0.Join();
-            t1.Join();
-            t2.Join();
-            t3.Join();
-            t4.Join();
-            t5.Join();
-            t6.Join();
-            t7.Join();
-            t8.Join();
-            t9.Join();
-
+            //Append Splitted Arrays
             int[] multiThreadSorted = new int[ARRAY_SIZE];
             int pointer = 0;
-            Splitted_array[0].CopyTo(multiThreadSorted, pointer);
-            pointer = pointer + Splitted_array[0].Length;
-            Splitted_array[1].CopyTo(multiThreadSorted, pointer);
-            pointer = pointer + Splitted_array[1].Length;
-            Splitted_array[2].CopyTo(multiThreadSorted, pointer);
-            pointer = pointer + Splitted_array[2].Length;
-            Splitted_array[3].CopyTo(multiThreadSorted, pointer);
-            pointer = pointer + Splitted_array[3].Length;
-            Splitted_array[4].CopyTo(multiThreadSorted, pointer);
-            pointer = pointer + Splitted_array[4].Length;
-            Splitted_array[5].CopyTo(multiThreadSorted, pointer);
-            pointer = pointer + Splitted_array[5].Length;
-            Splitted_array[6].CopyTo(multiThreadSorted, pointer);
-            pointer = pointer + Splitted_array[6].Length;
-            Splitted_array[7].CopyTo(multiThreadSorted, pointer);
-            pointer = pointer + Splitted_array[7].Length;
-            Splitted_array[8].CopyTo(multiThreadSorted, pointer);
-            pointer = pointer + Splitted_array[8].Length;
-            Splitted_array[9].CopyTo(multiThreadSorted, pointer);
-
-            Console.WriteLine(IsSorted(Splitted_array[0]));
-            Console.WriteLine(IsSorted(Splitted_array[1]));
-            Console.WriteLine(IsSorted(Splitted_array[2]));
-            Console.WriteLine(IsSorted(Splitted_array[3]));
-            Console.WriteLine(IsSorted(Splitted_array[4]));
-            Console.WriteLine(IsSorted(Splitted_array[5]));
-            Console.WriteLine(IsSorted(Splitted_array[6]));
-            Console.WriteLine(IsSorted(Splitted_array[7]));
-            Console.WriteLine(IsSorted(Splitted_array[8]));
-            Console.WriteLine(IsSorted(Splitted_array[9]));
-
-            Merge(multiThreadSorted, 0, 199, 99);
-            Merge(multiThreadSorted, 200, 399, 299);
-            Merge(multiThreadSorted, 400, 599, 499);
-            Merge(multiThreadSorted, 600, 799, 699);
-            Merge(multiThreadSorted, 800, 999, 899);
-
-            Merge(multiThreadSorted, 0, 399, 199);
-            Merge(multiThreadSorted, 400, 799, 599);
-
-            Merge(multiThreadSorted, 0, 799, 399);
-           
-            Merge(multiThreadSorted, 0, 999, 799);
-
-            Console.WriteLine();
-            Console.WriteLine(IsSorted(multiThreadSorted));
+            for (int k = 0; k < num_array; k++)
+            {
+                Splitted_array[k].CopyTo(multiThreadSorted, pointer);
+                pointer = pointer + Splitted_array[k].Length;
+            }
 
 
+            //Merging All the multithreaded 
+            int countma = num_array;
+            int numsorted = 0;
+            while (countma > 2)
+            {
+                for (int i = 0; i < countma; i = i + 2)
+                {
+                    int L = ARRAY_SIZE / countma * i;
+                    int R = ARRAY_SIZE / countma * (i + 2) - 1;
+                    int M = ARRAY_SIZE / countma * (i + 1) - 1;
+                    if (R > ARRAY_SIZE)
+                        break;
+                    //Console.WriteLine();
+                    //Console.WriteLine(L);
+                    //Console.WriteLine(R);
+                    //Console.WriteLine(M);
+                    //Console.WriteLine(i);
+                    //Console.WriteLine(countma);
+                    //Console.WriteLine();
+                    Merge(multiThreadSorted, L, R, M);
+                }
+                countma = countma / 2;
+            }
 
+            //Merging the Last 3 Arrays
+            int TransP1 = (int)(ARRAY_SIZE * 0.4 - 1);
+            int TransP2 = (int)(ARRAY_SIZE * 0.8 - 1);
 
+            Merge(multiThreadSorted, 0, TransP2, TransP1);
+            Merge(multiThreadSorted, 0, ARRAY_SIZE-1, TransP2);
 
+            //Console.Write(IsSorted(multiThreadSorted));
 
+            
+            //TODO :Stop the stopwatch
+            stopWatchMT.Stop();
+            // Get the elapsed time as a TimeSpan value.
+            TimeSpan tsMT = stopWatchMT.Elapsed;
+            //  PrintArray(arraySingleThread);
+
+            // Format and display the TimeSpan value.
+            string elapsedTimeMT = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                tsMT.Hours, tsMT.Minutes, tsMT.Seconds,
+                tsMT.Milliseconds / 10);
+            Console.WriteLine("MT RunTime " + elapsedTimeMT);
 
 
 
@@ -271,18 +255,12 @@ namespace MergeSort
                 string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
                     ts.Hours, ts.Minutes, ts.Seconds,
                     ts.Milliseconds / 10);
-                Console.WriteLine("RunTime " + elapsedTime);
+                Console.WriteLine("ST RunTime " + elapsedTime);
 
                 //TODO: Multi Threading Merge Sort
 
 
-
-
-
-
-
             
-
 
             // a helper function to confirm your array is sorted
             // returns boolean True if the array is sorted
