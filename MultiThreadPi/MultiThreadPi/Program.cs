@@ -10,10 +10,11 @@ namespace MultiThreadPi
     class MainClass
     {
         public static readonly object hitLock = new object();
+        private static readonly Random _global = new Random();
         static void Main(string[] args)
         {
-            long numberOfSamples = 100000000;
-            long SampleCapacityMT = numberOfSamples/6;
+            long numberOfSamples = 10000;
+            long SampleCapacityMT = numberOfSamples/30;
             long hits = 0;
             double[] hitsMT = new double[1];
             hitsMT[0] = 0;
@@ -90,14 +91,16 @@ namespace MultiThreadPi
                 tsMT.Milliseconds / 10);
             Console.WriteLine("MT RunTime " + elapsedTimeMT);
 
-
+               
              double[,] sampleArr = GenerateSamples(numberOfSamples);
 
         }
         static double[,] GenerateSamples(long numSamples)
         {
-            // Implement  
-            var rand = new Random();
+            // Implement
+            int seed = _global.Next();
+            var rand = new Random(seed);
+            //var rand = new Random();
             double[,] arr = new double[numSamples, 2];
 
             for (int i = 0; i < numSamples; i++)
@@ -138,7 +141,7 @@ namespace MultiThreadPi
                     if (radius <= 1)
                         h++;
                 }
-   
+            Console.WriteLine(h);
             lock (hitLock)
             {     
                 hits[0] = hits[0] + h;
